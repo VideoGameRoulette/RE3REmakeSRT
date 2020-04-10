@@ -28,52 +28,171 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.playerHealthStatus = new System.Windows.Forms.PictureBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.EnableEnemy = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableStats = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableKills = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableCollectables = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableInventory = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableRankDifficulty = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableDARankPoints = new System.Windows.Forms.ToolStripMenuItem();
             this.statisticsPanel = new DoubleBuffered.DoubleBufferedPanel();
             this.inventoryPanel = new DoubleBuffered.DoubleBufferedPanel();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.EnableDeathCounter = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.playerHealthStatus)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // playerHealthStatus
             // 
+            this.playerHealthStatus.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.playerHealthStatus.ContextMenuStrip = this.contextMenuStrip1;
+            this.playerHealthStatus.Dock = System.Windows.Forms.DockStyle.Fill;
             this.playerHealthStatus.Image = global::RE3REmakeSRT.Properties.Resources.EMPTY;
             this.playerHealthStatus.InitialImage = global::RE3REmakeSRT.Properties.Resources.EMPTY;
-            this.playerHealthStatus.Location = new System.Drawing.Point(1, 1);
+            this.playerHealthStatus.Location = new System.Drawing.Point(12, 3);
+            this.playerHealthStatus.Margin = new System.Windows.Forms.Padding(12, 3, 3, 3);
             this.playerHealthStatus.Name = "playerHealthStatus";
-            this.playerHealthStatus.Size = new System.Drawing.Size(150, 60);
+            this.playerHealthStatus.Size = new System.Drawing.Size(325, 161);
             this.playerHealthStatus.TabIndex = 0;
             this.playerHealthStatus.TabStop = false;
             this.playerHealthStatus.MouseDown += new System.Windows.Forms.MouseEventHandler(this.playerHealthStatus_MouseDown);
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.EnableEnemy,
+            this.EnableStats,
+            this.EnableInventory,
+            this.EnableRankDifficulty,
+            this.EnableDARankPoints,
+            this.EnableDeathCounter});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(217, 136);
+            // 
+            // EnableEnemy
+            // 
+            this.EnableEnemy.Name = "EnableEnemy";
+            this.EnableEnemy.Size = new System.Drawing.Size(216, 22);
+            this.EnableEnemy.Text = "Enable All Enemy HP";
+            this.EnableEnemy.Click += new System.EventHandler(this.EnableEnemy_Click);
+            // 
+            // EnableStats
+            // 
+            this.EnableStats.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.EnableKills,
+            this.EnableCollectables});
+            this.EnableStats.Name = "EnableStats";
+            this.EnableStats.Size = new System.Drawing.Size(216, 22);
+            this.EnableStats.Text = "Enable Stats";
+            this.EnableStats.Click += new System.EventHandler(this.EnableStats_Click);
+            // 
+            // EnableKills
+            // 
+            this.EnableKills.Name = "EnableKills";
+            this.EnableKills.Size = new System.Drawing.Size(193, 22);
+            this.EnableKills.Text = "Show Kill Stats";
+            this.EnableKills.Click += new System.EventHandler(this.EnableKills_Click);
+            // 
+            // EnableCollectables
+            // 
+            this.EnableCollectables.Name = "EnableCollectables";
+            this.EnableCollectables.Size = new System.Drawing.Size(193, 22);
+            this.EnableCollectables.Text = "Show Collectable Stats";
+            this.EnableCollectables.Click += new System.EventHandler(this.EnableCollectables_Click);
+            // 
+            // EnableInventory
+            // 
+            this.EnableInventory.Checked = true;
+            this.EnableInventory.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableInventory.Name = "EnableInventory";
+            this.EnableInventory.Size = new System.Drawing.Size(216, 22);
+            this.EnableInventory.Text = "Enable Inventory";
+            this.EnableInventory.Click += new System.EventHandler(this.EnableInventory_Click);
+            // 
+            // EnableRankDifficulty
+            // 
+            this.EnableRankDifficulty.Checked = true;
+            this.EnableRankDifficulty.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableRankDifficulty.Name = "EnableRankDifficulty";
+            this.EnableRankDifficulty.Size = new System.Drawing.Size(216, 22);
+            this.EnableRankDifficulty.Text = "Enable Rank and Difficulty";
+            this.EnableRankDifficulty.Click += new System.EventHandler(this.EnableRankDifficulty_Click);
+            // 
+            // EnableDARankPoints
+            // 
+            this.EnableDARankPoints.Checked = true;
+            this.EnableDARankPoints.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableDARankPoints.Name = "EnableDARankPoints";
+            this.EnableDARankPoints.Size = new System.Drawing.Size(216, 22);
+            this.EnableDARankPoints.Text = "Enable DA Rank and Points";
+            this.EnableDARankPoints.Click += new System.EventHandler(this.EnableDARankPoints_Click);
+            // 
             // statisticsPanel
             // 
-            this.statisticsPanel.Location = new System.Drawing.Point(1, 67);
+            this.statisticsPanel.ContextMenuStrip = this.contextMenuStrip1;
+            this.statisticsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.statisticsPanel.Location = new System.Drawing.Point(3, 170);
             this.statisticsPanel.Name = "statisticsPanel";
-            this.statisticsPanel.Size = new System.Drawing.Size(150, 354);
+            this.statisticsPanel.Size = new System.Drawing.Size(334, 139);
             this.statisticsPanel.TabIndex = 2;
             this.statisticsPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.statisticsPanel_MouseDown);
             // 
             // inventoryPanel
             // 
-            this.inventoryPanel.Location = new System.Drawing.Point(157, 1);
+            this.inventoryPanel.BackColor = System.Drawing.Color.Blue;
+            this.inventoryPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.inventoryPanel.Location = new System.Drawing.Point(3, 315);
             this.inventoryPanel.Name = "inventoryPanel";
-            this.inventoryPanel.Size = new System.Drawing.Size(336, 420);
+            this.inventoryPanel.Size = new System.Drawing.Size(334, 414);
             this.inventoryPanel.TabIndex = 3;
             this.inventoryPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.inventoryPanel_MouseDown);
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.ColumnCount = 1;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.Controls.Add(this.inventoryPanel, 0, 2);
+            this.tableLayoutPanel2.Controls.Add(this.statisticsPanel, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.playerHealthStatus, 0, 0);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 3;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 167F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 420F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(340, 732);
+            this.tableLayoutPanel2.TabIndex = 4;
+            // 
+            // EnableDeathCounter
+            // 
+            this.EnableDeathCounter.Checked = true;
+            this.EnableDeathCounter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableDeathCounter.Name = "EnableDeathCounter";
+            this.EnableDeathCounter.Size = new System.Drawing.Size(216, 22);
+            this.EnableDeathCounter.Text = "Enable Death Counter";
+            this.EnableDeathCounter.Click += new System.EventHandler(this.EnableDeathCounter_Click);
             // 
             // MainUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(494, 422);
-            this.Controls.Add(this.inventoryPanel);
-            this.Controls.Add(this.statisticsPanel);
-            this.Controls.Add(this.playerHealthStatus);
+            this.BackColor = System.Drawing.Color.Blue;
+            this.ClientSize = new System.Drawing.Size(340, 732);
+            this.ContextMenuStrip = this.contextMenuStrip1;
+            this.Controls.Add(this.tableLayoutPanel2);
             this.DoubleBuffered = true;
             this.ForeColor = System.Drawing.Color.White;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(360, 1080);
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(360, 630);
             this.Name = "MainUI";
             this.ShowIcon = false;
             this.Text = "RE3 (2020) SRT";
@@ -81,6 +200,8 @@
             this.Load += new System.EventHandler(this.MainUI_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainUI_MouseDown);
             ((System.ComponentModel.ISupportInitialize)(this.playerHealthStatus)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -90,5 +211,15 @@
         private System.Windows.Forms.PictureBox playerHealthStatus;
         private DoubleBuffered.DoubleBufferedPanel statisticsPanel;
         private DoubleBuffered.DoubleBufferedPanel inventoryPanel;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem EnableEnemy;
+        private System.Windows.Forms.ToolStripMenuItem EnableStats;
+        private System.Windows.Forms.ToolStripMenuItem EnableKills;
+        private System.Windows.Forms.ToolStripMenuItem EnableCollectables;
+        private System.Windows.Forms.ToolStripMenuItem EnableInventory;
+        private System.Windows.Forms.ToolStripMenuItem EnableRankDifficulty;
+        private System.Windows.Forms.ToolStripMenuItem EnableDARankPoints;
+        private System.Windows.Forms.ToolStripMenuItem EnableDeathCounter;
     }
 }

@@ -18,23 +18,20 @@ namespace RE3REmakeSRT
         public int ProcessExitCode => memoryAccess.ProcessExitCode;
         private const string IGT_TIMESPAN_STRING_FORMAT = @"hh\:mm\:ss\.fff";
 
-        // Pointer Address Variables
-        private long pointerAddressIGT;
-        private long pointerAddressRank;
-        private long pointerAddressHP;
-        private long pointerAddressInventory;
-        private long pointerAddressEnemy;
-        private long pointerAddressPoison;
-
-        // Pointer Classes
+        // Pointers
         private long BaseAddress { get; set; }
+        private MultilevelPointer PointerMapID { get; set; }
+        private MultilevelPointer PointerDeathCount { get; set; }
         private MultilevelPointer PointerIGT { get; set; }
         private MultilevelPointer PointerRank { get; set; }
         private MultilevelPointer PointerPlayerHP { get; set; }
+        private MultilevelPointer PointerSavesCount { get; set; }
         private MultilevelPointer PointerPlayerPoison { get; set; }
         private MultilevelPointer PointerEnemyEntryCount { get; set; }
         private MultilevelPointer[] PointerEnemyEntries { get; set; }
         private MultilevelPointer[] PointerInventoryEntries { get; set; }
+        private MultilevelPointer PointerStatsInfo { get; set; }
+        private MultilevelPointer PointerDifficulty { get; set; }
 
         // Public Properties
         public int PlayerCurrentHealth { get; private set; }
@@ -47,7 +44,21 @@ namespace RE3REmakeSRT
         public long IGTCutsceneTimer { get; private set; }
         public long IGTMenuTimer { get; private set; }
         public long IGTPausedTimer { get; private set; }
+        public int SavesCount { get; private set; }
+        public int HandgunKills { get; private set; }
+        public int ShotgunKills { get; private set; }
+        public int GLauncherKills { get; private set; }
+        public int MAGKills { get; private set; }
+        public int ARifleKills { get; private set; }
+        public int EnemyKills { get; private set; }
+        public int MrCharlies { get; private set; }
+        public int LocksPicked { get; private set; }
         public int Rank { get; private set; }
+        public int Difficulty { get; private set; }
+        public int Lore { get; private set; }
+        public int Attachments { get; private set; }
+        public int MapID { get; private set; }
+        public int DeathCount { get; private set; }
         public float RankScore { get; private set; }
 
         // Public Properties - Calculated
@@ -77,20 +88,26 @@ namespace RE3REmakeSRT
         {
             memoryAccess = new ProcessMemory.ProcessMemory(pid);
             BaseAddress = NativeWrappers.GetProcessBaseAddress(pid, ProcessMemory.PInvoke.ListModules.LIST_MODULES_64BIT).ToInt64(); // Bypass .NET's managed solution for getting this and attempt to get this info ourselves via PInvoke since some users are getting 299 PARTIAL COPY when they seemingly shouldn't. This is built as x64 only and RE3 is x64 only to my knowledge.
-            SelectPointerAddresses();
 
             // Setup the pointers.
-            PointerIGT = new MultilevelPointer(memoryAccess, BaseAddress + pointerAddressIGT, 0x60L); // *
-            PointerRank = new MultilevelPointer(memoryAccess, BaseAddress + pointerAddressRank); // *
-            PointerPlayerHP = new MultilevelPointer(memoryAccess, BaseAddress + pointerAddressHP, 0x50L, 0x20L); // *
-            PointerPlayerPoison = new MultilevelPointer(memoryAccess, BaseAddress + pointerAddressPoison, 0x50L, 0x20L, 0xF8L);
+            
+            PointerIGT = new MultilevelPointer(memoryAccess, BaseAddress + 0x08DAA3F0, 0x60L); // *
+            PointerSavesCount = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7C628, 0x1D8L, 0x198);
+            PointerMapID = new MultilevelPointer(memoryAccess, BaseAddress + 0x05589470);
+            PointerDeathCount = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D783B0, 0xA8L, 0x70L, 0x230L);
+            PointerRank = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D78258); // *
+            PointerPlayerHP = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7C5E8, 0x50L, 0x20L); // *
+            PointerPlayerPoison = new MultilevelPointer(memoryAccess, BaseAddress + 0x08DCB6C0, 0x50L, 0x20L, 0xF8L);
 
-            PointerEnemyEntryCount = new MultilevelPointer(memoryAccess, BaseAddress + pointerAddressEnemy, 0x30L); // *
+            PointerDifficulty = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7B548, 0x20L, 0x50L);
+            PointerStatsInfo = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7B548, 0x178L);
+
+            PointerEnemyEntryCount = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7A5A8, 0x30L); // *
             GenerateEnemyEntries();
 
             PointerInventoryEntries = new MultilevelPointer[20];
             for (long i = 0; i < PointerInventoryEntries.Length; ++i)
-                PointerInventoryEntries[i] = new MultilevelPointer(memoryAccess, BaseAddress + pointerAddressInventory, 0x50L, 0x98L, 0x10L, 0x20L + (i * 0x08L), 0x18L); // *
+                PointerInventoryEntries[i] = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7C5E8, 0x50L, 0x98L, 0x10L, 0x20L + (i * 0x08L), 0x18L); // *
 
             // Initialize variables to default values.
             PlayerCurrentHealth = 0;
@@ -102,32 +119,21 @@ namespace RE3REmakeSRT
             IGTCutsceneTimer = 0L;
             IGTMenuTimer = 0L;
             IGTPausedTimer = 0L;
+            SavesCount = 0;
             Rank = 0;
             RankScore = 0f;
-        }
-
-        private void SelectPointerAddresses()
-        {
-            if (Program.gameHash.SequenceEqual(Program.BIO3Z_Hash)) // Japanese CERO Z, latest build.
-            {
-                pointerAddressIGT = 0x08CE8430;
-                pointerAddressRank = 0x08CB62A8;
-                pointerAddressHP = 0x08CBA618;
-                pointerAddressInventory = 0x08CBA618;
-                pointerAddressEnemy = 0x08CB8618;
-
-                pointerAddressPoison = 0x08DCB6C0; // Not actually used right now.
-            }
-            else // World-wide, latest build.
-            {
-                pointerAddressIGT = 0x08DAA3F0;
-                pointerAddressRank = 0x08D78258;
-                pointerAddressHP = 0x08D7C5E8;
-                pointerAddressInventory = 0x08D7C5E8;
-                pointerAddressEnemy = 0x08D7A5A8;
-
-                pointerAddressPoison = 0x08DCB6C0; // Not actually used right now.
-            }
+            HandgunKills = 0;
+            ShotgunKills = 0;
+            GLauncherKills = 0;
+            MAGKills = 0;
+            ARifleKills = 0;
+            EnemyKills = 0;
+            MrCharlies = 0;
+            LocksPicked = 0;
+            Difficulty = 0;
+            Lore = 0;
+            MapID = 0;
+            DeathCount = 0;
         }
 
         /// <summary>
@@ -140,7 +146,7 @@ namespace RE3REmakeSRT
             {
                 PointerEnemyEntries = new MultilevelPointer[EnemyTableCount]; // Create a new enemy pointer table array with the detected size.
                 for (long i = 0; i < PointerEnemyEntries.Length; ++i) // Loop through and create all of the pointers for the table.
-                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, BaseAddress + pointerAddressEnemy, 0x30L, 0x20L + (i * 0x08L), 0x300L);
+                    PointerEnemyEntries[i] = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7A5A8, 0x30L, 0x20L + (i * 0x08L), 0x300L);
             }
         }
 
@@ -149,10 +155,15 @@ namespace RE3REmakeSRT
         /// </summary>
         public void UpdatePointers()
         {
+            PointerDeathCount.UpdatePointers();
+            PointerMapID.UpdatePointers();
             PointerIGT.UpdatePointers();
             PointerPlayerHP.UpdatePointers();
             PointerPlayerPoison.UpdatePointers();
             PointerRank.UpdatePointers();
+            PointerSavesCount.UpdatePointers();
+            PointerStatsInfo.UpdatePointers();
+            PointerDifficulty.UpdatePointers();
 
             PointerEnemyEntryCount.UpdatePointers();
             GenerateEnemyEntries(); // This has to be here for the next part.
@@ -187,11 +198,25 @@ namespace RE3REmakeSRT
 
             // Other lookups that don't need to update as often.
             // Player HP
+            DeathCount = PointerDeathCount.DerefInt(0x18);
             PlayerMaxHealth = PointerPlayerHP.DerefInt(0x54);
             PlayerCurrentHealth = PointerPlayerHP.DerefInt(0x58);
             PlayerPoisoned = PointerPlayerPoison.DerefByte(0x258) == 0x01;
             Rank = PointerRank.DerefInt(0x58);
             RankScore = PointerRank.DerefFloat(0x5C);
+            SavesCount = PointerSavesCount.DerefInt(0x24);
+            Difficulty = PointerDifficulty.DerefInt(0x78);
+            MapID = PointerMapID.DerefInt(0x1D0);
+            Lore = PointerStatsInfo.DerefInt(0x438);
+            Attachments = PointerStatsInfo.DerefInt(0x43C);
+            MrCharlies = PointerStatsInfo.DerefInt(0x440);
+            LocksPicked = PointerStatsInfo.DerefInt(0x448);
+            EnemyKills = PointerStatsInfo.DerefInt(0x4B4);
+            HandgunKills = PointerStatsInfo.DerefInt(0x4B8);
+            ShotgunKills = PointerStatsInfo.DerefInt(0x4BC);
+            GLauncherKills = PointerStatsInfo.DerefInt(0x4C0);
+            MAGKills = PointerStatsInfo.DerefInt(0x4C4);
+            ARifleKills = PointerStatsInfo.DerefInt(0x4C8);
 
             // Enemy HP
             GenerateEnemyEntries();

@@ -15,6 +15,7 @@ namespace RE3REmakeSRT
 {
     public partial class MainUI : Form
     {
+        bool debug = false;
         // How often to perform more expensive operations.
         // 2000 milliseconds for updating pointers.
         // 333 milliseconds for a full scan.
@@ -34,7 +35,9 @@ namespace RE3REmakeSRT
         private PixelOffsetMode pixelOffsetMode = PixelOffsetMode.Half;
         private InterpolationMode interpolationMode = InterpolationMode.NearestNeighbor;
         private TextRenderingHint textRenderingHint = TextRenderingHint.AntiAliasGridFit;
-        
+        private TimeSpan SRank;
+        private TimeSpan BRank;
+
         // Text alignment and formatting.
         private StringFormat invStringFormat = new StringFormat(StringFormat.GenericDefault) { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Far };
         private StringFormat stdStringFormat = new StringFormat(StringFormat.GenericDefault) { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Near };
@@ -48,17 +51,24 @@ namespace RE3REmakeSRT
         private Bitmap inventoryItemImage;
         private Bitmap inventoryWeaponImage;
 
+        public enum REDifficultyState : int
+        {
+            ASSIST,
+            STANDARD,
+            HARDCORE,
+            NIGHTMARE,
+            INFERNO
+        }
+
+        private string diffName = "";
+        private string rankName = "";
+
         public MainUI()
         {
             InitializeComponent();
 
             // Set titlebar.
             this.Text += string.Format(" {0}", Program.srtVersion);
-
-            this.ContextMenu = Program.contextMenu;
-            this.playerHealthStatus.ContextMenu = Program.contextMenu;
-            this.statisticsPanel.ContextMenu = Program.contextMenu;
-            this.inventoryPanel.ContextMenu = Program.contextMenu;
 
             // JSON http endpoint.
             jsonServer = new JSONServer();
@@ -239,45 +249,52 @@ namespace RE3REmakeSRT
             e.Graphics.PixelOffsetMode = pixelOffsetMode;
             e.Graphics.TextRenderingHint = textRenderingHint;
 
+            int x = 20, y = 115;
+
             // Draw health.
             Font healthFont = new Font("Consolas", 14, FontStyle.Bold);
-            if (Program.gameMemory.PlayerCurrentHealth > 1200 || Program.gameMemory.PlayerCurrentHealth < 0) // Dead?
+            
+            if (debug)
             {
-                e.Graphics.DrawString("DEAD", healthFont, Brushes.Red, 15, 37, stdStringFormat);
+                //e.Graphics.DrawString(string.Format("MapID: {0}", Program.gameMemory.MapID.ToString()), healthFont, Brushes.White, 0, 0, stdStringFormat);
+                e.Graphics.DrawString(string.Format("Width: {0}", this.Width), healthFont, Brushes.White, 0, 0, stdStringFormat);
+                e.Graphics.DrawString(string.Format("Height: {0}", this.Height), healthFont, Brushes.White, 0, 15, stdStringFormat);
+            }
+
+            if (Program.gameMemory.PlayerPoisoned)
+            {
+                playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.POISON, "POISON");
+                return;
+            }
+            else if (Program.gameMemory.PlayerCurrentHealth > 1200 || Program.gameMemory.PlayerCurrentHealth < 0) // Dead?
+            {
+                e.Graphics.DrawString("DEAD", healthFont, Brushes.Red, x, y, stdStringFormat);
                 playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.EMPTY, "EMPTY");
+                return;
             }
             else if (Program.gameMemory.PlayerCurrentHealth >= 801) // Fine (Green)
             {
-                e.Graphics.DrawString(Program.gameMemory.PlayerCurrentHealth.ToString(), healthFont, Brushes.LawnGreen, 15, 37, stdStringFormat);
-
-                if (!Program.gameMemory.PlayerPoisoned)
-                    playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.FINE, "FINE");
-                else
-                    playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.POISON, "POISON");
+                e.Graphics.DrawString(Program.gameMemory.PlayerCurrentHealth.ToString(), healthFont, Brushes.LawnGreen, x, y, stdStringFormat);
+                playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.FINE, "FINE");
+                return;
             }
             else if (Program.gameMemory.PlayerCurrentHealth <= 800 && Program.gameMemory.PlayerCurrentHealth >= 361) // Caution (Yellow)
             {
-                e.Graphics.DrawString(Program.gameMemory.PlayerCurrentHealth.ToString(), healthFont, Brushes.Goldenrod, 15, 37, stdStringFormat);
-
-                if (!Program.gameMemory.PlayerPoisoned)
-                    playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.CAUTION_YELLOW, "CAUTION_YELLOW");
-                else
-                    playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.POISON, "POISON");
+                e.Graphics.DrawString(Program.gameMemory.PlayerCurrentHealth.ToString(), healthFont, Brushes.Goldenrod, x, y, stdStringFormat);
+                playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.CAUTION_YELLOW, "CAUTION_YELLOW");
+                return;
             }
             else if (Program.gameMemory.PlayerCurrentHealth <= 360) // Danger (Red)
             {
-                e.Graphics.DrawString(Program.gameMemory.PlayerCurrentHealth.ToString(), healthFont, Brushes.Red, 15, 37, stdStringFormat);
-
-                if (!Program.gameMemory.PlayerPoisoned)
-                    playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.DANGER, "DANGER");
-                else
-                    playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.POISON, "POISON");
+                e.Graphics.DrawString(Program.gameMemory.PlayerCurrentHealth.ToString(), healthFont, Brushes.Red, x, y, stdStringFormat);
+                playerHealthStatus.ThreadSafeSetHealthImage(Properties.Resources.DANGER, "DANGER");
+                return;
             }
         }
 
         private void inventoryPanel_Paint(object sender, PaintEventArgs e)
         {
-            if (!Program.programSpecialOptions.Flags.HasFlag(ProgramFlags.NoInventory))
+            if (EnableInventory.Checked)
             {
                 e.Graphics.SmoothingMode = smoothingMode;
                 e.Graphics.CompositingQuality = compositingQuality;
@@ -342,40 +359,231 @@ namespace RE3REmakeSRT
 
             // Additional information and stats.
             // Adjustments for displaying text properly.
-            int heightGap = 15;
-            int heightOffset = 0;
-            int i = 1;
+            int HPBarHeight = 25;
+            int xOffset = 10;
+            int yOffset = 0;
+
+            //Fonts
+            int fontSize = 34;
+            Font font = new Font("Consolas", fontSize, FontStyle.Bold);
+
+            int fontSize2 = 20;
+            Font font2 = new Font("Consolas", fontSize2, FontStyle.Bold);
+
+            int fontSize3 = 15;
+            Font font3 = new Font("Consolas", fontSize3, FontStyle.Bold);
 
             // IGT Display.
-            e.Graphics.DrawString(string.Format("{0}", Program.gameMemory.IGTFormattedString), new Font("Consolas", 16, FontStyle.Bold), Brushes.White, 0, 0, stdStringFormat);
+            e.Graphics.DrawString(string.Format("{0}", Program.gameMemory.IGTFormattedString.Remove(8,4)), font, Brushes.White, xOffset, -10, stdStringFormat);
+            yOffset += fontSize;
 
-            if (Program.programSpecialOptions.Flags.HasFlag(ProgramFlags.Debug))
+            //Time Spans
+            if (Program.gameMemory.Difficulty == (int)REDifficultyState.ASSIST)
             {
-                e.Graphics.DrawString("Raw IGT", new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, 25, stdStringFormat);
-                e.Graphics.DrawString("A:" + Program.gameMemory.IGTRunningTimer.ToString("00000000000000000000"), new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, 38, stdStringFormat);
-                e.Graphics.DrawString("C:" + Program.gameMemory.IGTCutsceneTimer.ToString("00000000000000000000"), new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, 53, stdStringFormat);
-                e.Graphics.DrawString("M:" + Program.gameMemory.IGTMenuTimer.ToString("00000000000000000000"), new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, 68, stdStringFormat);
-                e.Graphics.DrawString("P:" + Program.gameMemory.IGTPausedTimer.ToString("00000000000000000000"), new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, 83, stdStringFormat);
-                heightOffset = 70; // Adding an additional offset to accomdate Raw IGT.
+                diffName = "Assist";
+                SRank = new TimeSpan(0, 2, 30, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Program.gameMemory.Difficulty == (int)REDifficultyState.STANDARD)
+            {
+                diffName = "Standard";
+                SRank = new TimeSpan(0, 2, 0, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Program.gameMemory.Difficulty == (int)REDifficultyState.HARDCORE)
+            {
+                diffName = "Hardcore";
+                SRank = new TimeSpan(0, 1, 45, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Program.gameMemory.Difficulty == (int)REDifficultyState.NIGHTMARE)
+            {
+                diffName = "Nightmare";
+                SRank = new TimeSpan(0, 2, 0, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Program.gameMemory.Difficulty == (int)REDifficultyState.INFERNO)
+            {
+                diffName = "Inferno";
+                SRank = new TimeSpan(0, 2, 0, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
             }
 
-            e.Graphics.DrawString(string.Format("DA Rank: {0}", Program.gameMemory.Rank), new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, heightOffset + (heightGap * ++i), stdStringFormat);
-            e.Graphics.DrawString(string.Format("DA Score: {0}", Program.gameMemory.RankScore), new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, heightOffset + (heightGap * ++i), stdStringFormat);
+            //Ranks
+            if (Program.gameMemory.IGTTimeSpan <= SRank && Program.gameMemory.SavesCount <=5) { rankName = "Rank:S"; }
+            else if (Program.gameMemory.IGTTimeSpan <= SRank && Program.gameMemory.SavesCount > 5) { rankName = "Rank:A"; }
+            else if (Program.gameMemory.IGTTimeSpan > SRank && Program.gameMemory.IGTTimeSpan <= BRank) { rankName = "Rank:B"; }
+            else if (Program.gameMemory.IGTTimeSpan > BRank) { rankName = "Rank:C"; }
 
-            if (Program.programSpecialOptions.Flags.HasFlag(ProgramFlags.Debug))
-                e.Graphics.DrawString(string.Format("Enemy Count: {0}", Program.gameMemory.EnemyTableCount), new Font("Consolas", 9, FontStyle.Bold), Brushes.Gray, 0, heightOffset + (heightGap * ++i), stdStringFormat);
-
-            e.Graphics.DrawString("Enemy HP", new Font("Consolas", 10, FontStyle.Bold), Brushes.Red, 0, heightOffset + (heightGap * ++i), stdStringFormat);
-            foreach (EnemyHP enemyHP in Program.gameMemory.EnemyHealth.Where(a => a.IsAlive).OrderBy(a => a.Percentage).ThenByDescending(a => a.CurrentHP))
+            if (EnableRankDifficulty.Checked)
             {
-                int x = 0;
-                int y = heightOffset + (heightGap * ++i);
-
-                DrawProgressBarGDI(e, backBrushGDI, foreBrushGDI, x, y, 146, heightGap, enemyHP.Percentage * 100f, 100f);
-                e.Graphics.DrawString(string.Format("{0} {1:P1}", enemyHP.CurrentHP, enemyHP.Percentage), new Font("Consolas", 10, FontStyle.Bold), Brushes.Red, x, y, stdStringFormat);
+                e.Graphics.DrawString(string.Format("{0} {1}", rankName, diffName), font2, Brushes.Gray, xOffset, yOffset, stdStringFormat);
+                yOffset += fontSize2;
             }
+
+            if (EnableDARankPoints.Checked)
+            {
+                yOffset += 10;
+                e.Graphics.DrawString(string.Format("DA Rank: {0} DA Score: {1}", Program.gameMemory.Rank, Program.gameMemory.RankScore), font3, Brushes.Gray, xOffset + 1, yOffset, stdStringFormat);
+                yOffset += fontSize3;
+            }
+
+            if (EnableDeathCounter.Checked)
+            {
+                yOffset += 10;
+                e.Graphics.DrawString(string.Format("Deaths: {0}", Program.gameMemory.DeathCount.ToString()), font3, Brushes.Gray, xOffset + 1, yOffset, stdStringFormat);
+                yOffset += fontSize3;
+            }
+            
+
+            //e.Graphics.DrawString(string.Format("SaveCount:{0}", Program.gameMemory.SavesCount), font, Brushes.Gray, x2, heightOffset + fontSize, stdStringFormat);
+
+            int width = RE3REmakeSRT.Properties.Resources.EMPTY.Width;//300;
+
+            //e.Graphics.DrawString(string.Format("Enemy Count: {0}", Program.gameMemory.EnemyTableCount), font, Brushes.Gray, 0, heightOffset + (heightGap * ++i), stdStringFormat);
+
+            foreach (EnemyHP enemyHP in Program.gameMemory.EnemyHealth.Where(a => a.IsAlive).OrderByDescending(a => a.MaximumHP).ThenByDescending(a => a.Percentage))
+            {
+                string name = "";
+                bool nemesis = false;
+
+                //ASSIST MODE HP VALUES
+                if (Program.gameMemory.Difficulty == (int)REDifficultyState.ASSIST)
+                {
+                    if (enemyHP.MaximumHP == 8000 || enemyHP.MaximumHP == 20000) { nemesis = true; name = "Nemesis"; }
+                    else if (enemyHP.MaximumHP == 1500) { name = "Brad"; }
+                    else { name = "Enemy"; }
+                }
+                //STANDARD MODE HP VALUES
+                else if (Program.gameMemory.Difficulty == (int)REDifficultyState.STANDARD)
+                {
+                    if (enemyHP.MaximumHP == 8000 || enemyHP.MaximumHP == 20000) { nemesis = true; name = "Nemesis"; }
+                    else if (enemyHP.MaximumHP == 3200) { name = "Hunter γ"; }
+                    else if (enemyHP.MaximumHP == 2100) { name = "Hunter β"; }
+                    else if (enemyHP.MaximumHP >= 1700 && enemyHP.MaximumHP <= 1800) { name = "Licker"; }
+                    else if (enemyHP.MaximumHP == 1500) { name = "Parasite"; }
+                    else if (enemyHP.MaximumHP <= 1000) { name = "Infected"; }
+                }
+                //HARDCORE MODE HP VALUES
+                else if (Program.gameMemory.Difficulty == (int)REDifficultyState.HARDCORE)
+                {
+                    if (enemyHP.MaximumHP == 8000 || enemyHP.MaximumHP == 20000) { nemesis = true; name = "Nemesis"; }
+                    else if (enemyHP.MaximumHP == 1500) { name = "Brad"; }
+                    else { name = "Enemy"; }
+                }
+                //NIGHTMARE MODE HP VALUES
+                else if (Program.gameMemory.Difficulty == (int)REDifficultyState.NIGHTMARE)
+                {
+                    if (enemyHP.MaximumHP == 8000 || enemyHP.MaximumHP == 20000) { nemesis = true; name = "Nemesis"; }
+                    else if (enemyHP.MaximumHP == 1500) { name = "Brad"; }
+                    else { name = "Enemy"; }
+                }
+                //INFERNO MODE HP VALUES
+                else if (Program.gameMemory.Difficulty == (int)REDifficultyState.INFERNO)
+                {
+                    if (enemyHP.MaximumHP == 8000 || enemyHP.MaximumHP == 20000) { nemesis = true; name = "Nemesis"; }
+                    else if (enemyHP.MaximumHP == 1500) { name = "Brad"; }
+                    else { name = "Enemy"; }
+                }
+
+                //yOffset += HPBarHeight + 10;
+                if (enemyHP.MaximumHP > 9999)
+                {
+                    name = name.PadRight(14, ' ');
+                }
+                else if (enemyHP.MaximumHP > 999 && enemyHP.MaximumHP < 10000)
+                {
+                    name = name.PadRight(15, ' ');
+                }
+                else
+                {
+                    name = name.PadRight(16, ' ');
+                }
+                
+                string info = "{0} {1} {2:P1}";
+
+                if (EnableEnemy.Checked)
+                {
+                    yOffset += 8;
+                    DrawProgressBarGDI(e, backBrushGDI, foreBrushGDI, xOffset, yOffset, width, HPBarHeight, enemyHP.Percentage * 100f, 100f);
+                    e.Graphics.DrawString(string.Format(info, name, enemyHP.CurrentHP, enemyHP.Percentage), font3, Brushes.Red, xOffset, yOffset, stdStringFormat);
+                    yOffset += HPBarHeight;
+                }
+                else
+                {
+                    
+                    if (nemesis)
+                    {
+                        yOffset += 8;
+                        DrawProgressBarGDI(e, backBrushGDI, foreBrushGDI, xOffset, yOffset, width, HPBarHeight, enemyHP.Percentage * 100f, 100f);
+                        e.Graphics.DrawString(string.Format(info, name, enemyHP.CurrentHP, enemyHP.Percentage), font3, Brushes.Red, xOffset, yOffset, stdStringFormat);
+                        yOffset += HPBarHeight;
+                    }
+                    
+                }
+                
+            }
+
+            Brush colorBrush;
+            string s = "";
+
+            xOffset = 11;
+            yOffset += 10;
+
+            if (EnableKills.Checked)
+            {
+                s = (Program.gameMemory.EnemyKills >= 2000) ? "Enemies Killed:{0}" : "Enemies Killed:{0}/2000";
+                colorBrush = SetBrushColor(Program.gameMemory.EnemyKills, 2000);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.EnemyKills.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.HandgunKills >= 200) ? "Handgun Kills:{0}" : "Handgun Kills:{0}/200";
+                colorBrush = SetBrushColor(Program.gameMemory.HandgunKills, 200);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.HandgunKills.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.ShotgunKills >= 130) ? "Shotgun Kills:{0}" : "Shotgun Kills:{0}/130";
+                colorBrush = SetBrushColor(Program.gameMemory.ShotgunKills, 130);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.ShotgunKills.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.GLauncherKills >= 120) ? "Grenade Launcher Kills:{0}" : "Grenade Launcher Kills:{0}/120";
+                colorBrush = SetBrushColor(Program.gameMemory.GLauncherKills, 120);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.GLauncherKills.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.MAGKills >= 80) ? "MAG Kills:{0}" : "MAG Kills:{0}/80";
+                colorBrush = SetBrushColor(Program.gameMemory.MAGKills, 80);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.MAGKills.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.ARifleKills >= 400) ? "Assault Rifle Kills:{0}" : "Assault Rifle Kills:{0}/400";
+                colorBrush = SetBrushColor(Program.gameMemory.ARifleKills, 400);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.ARifleKills.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+            }
+
+            if (EnableCollectables.Checked)
+            {
+                s = (Program.gameMemory.Lore >= 56) ? "Lore Found:{0}" : "Lore Found:{0}/56";
+                colorBrush = SetBrushColor(Program.gameMemory.Lore, 56);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.Lore.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.Attachments >= 10) ? "Attachments Found:{0}" : "Attachments Found:{0}/10";
+                colorBrush = SetBrushColor(Program.gameMemory.Attachments, 10);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.Attachments.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.MrCharlies >= 20) ? "Mr.Charlies Found:{0}" : "Mr.Charlies Found:{0}/20";
+                colorBrush = SetBrushColor(Program.gameMemory.MrCharlies, 20);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.MrCharlies.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+                yOffset += (int)font3.Size + 4;
+                s = (Program.gameMemory.LocksPicked >= 20) ? "Locks Picked:{0}" : "Locks Picked:{0}/20";
+                colorBrush = SetBrushColor(Program.gameMemory.LocksPicked, 20);
+                e.Graphics.DrawString(string.Format(s, Program.gameMemory.LocksPicked.ToString()), font3, colorBrush, xOffset, yOffset, stdStringFormat);
+            }
+
         }
 
+        public Brush SetBrushColor(int stat, int max)
+        {
+            if (stat >= max) { return Brushes.Green; }
+            else { return Brushes.Red; }
+        }
         // Customisation in future?
         private Brush backBrushGDI = new SolidBrush(Color.FromArgb(255, 60, 60, 60));
         private Brush foreBrushGDI = new SolidBrush(Color.FromArgb(255, 100, 0, 0));
@@ -444,6 +652,135 @@ namespace RE3REmakeSRT
             }
             else
                 this.Close();
+        }
+
+        private void EnableEnemy_Click(object sender, EventArgs e)
+        {
+            EnableEnemy.Checked = !EnableEnemy.Checked;
+            if (EnableEnemy.Checked)
+            {
+                this.Height += 305; //1080
+                EnableStats.Checked = false;
+                EnableKills.Checked = false;
+                EnableCollectables.Checked = false;
+            }
+            else
+            {
+                this.Height -= 305; //775
+            }
+        }
+
+        private void EnableStats_Click(object sender, EventArgs e)
+        {
+            EnableStats.Checked = !EnableStats.Checked;
+            if (EnableEnemy.Checked)
+            {
+                this.Height -= 173;
+                EnableEnemy.Checked = false;
+                EnableKills.Checked = true;
+                EnableCollectables.Checked = true;
+            }
+            else if (EnableStats.Checked && !EnableEnemy.Checked)
+            { 
+                this.Height += 198;
+                EnableEnemy.Checked = false;
+                EnableKills.Checked = true;
+                EnableCollectables.Checked = true;
+            }
+            else
+            {
+                if (EnableKills.Checked && EnableCollectables.Checked)
+                {
+                    this.Height -= 205;
+                }
+                else if (EnableKills.Checked && !EnableCollectables.Checked)
+                {
+                    this.Height -= 125;
+                }
+                else if (!EnableKills.Checked && EnableCollectables.Checked)
+                {
+                    this.Height -= 80;
+                }
+                else
+                {
+                    return;
+                }
+                EnableKills.Checked = false;
+                EnableCollectables.Checked = false;
+            }
+        }
+
+        private void EnableKills_Click(object sender, EventArgs e)
+        {
+            EnableEnemy.Checked = false;
+            EnableKills.Checked = !EnableKills.Checked;
+            if (EnableKills.Checked)
+            {
+                this.Height += 125;
+            }
+            else
+            {
+                this.Height -= 125;
+            }
+        }
+
+        private void EnableCollectables_Click(object sender, EventArgs e)
+        {
+            EnableEnemy.Checked = false;
+            EnableCollectables.Checked = !EnableCollectables.Checked;
+            if (EnableCollectables.Checked)
+            {
+                EnableStats.Checked = true;
+                this.Height += 80;
+            }
+            else
+            {
+                this.Height -= 80;
+            }
+        }
+
+        private void EnableInventory_Click(object sender, EventArgs e)
+        {
+            EnableInventory.Checked = !EnableInventory.Checked;
+        }
+
+        private void EnableRankDifficulty_Click(object sender, EventArgs e)
+        {
+            EnableRankDifficulty.Checked = !EnableRankDifficulty.Checked;
+            if (EnableRankDifficulty.Checked)
+            {
+                this.Height += 20;
+            }
+            else
+            {
+                this.Height -= 20;
+            }
+        }
+
+        private void EnableDARankPoints_Click(object sender, EventArgs e)
+        {
+            EnableDARankPoints.Checked = !EnableDARankPoints.Checked;
+            if (EnableDARankPoints.Checked)
+            {
+                this.Height += 25;
+            }
+            else
+            {
+                this.Height -= 25;
+            }
+        }
+
+        private void EnableDeathCounter_Click(object sender, EventArgs e)
+        {
+            EnableDeathCounter.Checked = !EnableDeathCounter.Checked;
+            if (EnableDeathCounter.Checked)
+            {
+                this.Height += 15;
+            }
+            else
+            {
+                this.Height -= 15;
+            }
         }
     }
 }
