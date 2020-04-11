@@ -38,10 +38,10 @@
             this.EnableInventory = new System.Windows.Forms.ToolStripMenuItem();
             this.EnableRankDifficulty = new System.Windows.Forms.ToolStripMenuItem();
             this.EnableDARankPoints = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableDeathCounter = new System.Windows.Forms.ToolStripMenuItem();
             this.statisticsPanel = new DoubleBuffered.DoubleBufferedPanel();
             this.inventoryPanel = new DoubleBuffered.DoubleBufferedPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.EnableDeathCounter = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.playerHealthStatus)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -132,6 +132,15 @@
             this.EnableDARankPoints.Text = "Enable DA Rank and Points";
             this.EnableDARankPoints.Click += new System.EventHandler(this.EnableDARankPoints_Click);
             // 
+            // EnableDeathCounter
+            // 
+            this.EnableDeathCounter.Checked = true;
+            this.EnableDeathCounter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableDeathCounter.Name = "EnableDeathCounter";
+            this.EnableDeathCounter.Size = new System.Drawing.Size(216, 22);
+            this.EnableDeathCounter.Text = "Enable Map ID";
+            this.EnableDeathCounter.Click += new System.EventHandler(this.EnableDeathCounter_Click);
+            // 
             // statisticsPanel
             // 
             this.statisticsPanel.ContextMenuStrip = this.contextMenuStrip1;
@@ -168,15 +177,6 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 420F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(340, 732);
             this.tableLayoutPanel2.TabIndex = 4;
-            // 
-            // EnableDeathCounter
-            // 
-            this.EnableDeathCounter.Checked = true;
-            this.EnableDeathCounter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.EnableDeathCounter.Name = "EnableDeathCounter";
-            this.EnableDeathCounter.Size = new System.Drawing.Size(216, 22);
-            this.EnableDeathCounter.Text = "Enable Death Counter";
-            this.EnableDeathCounter.Click += new System.EventHandler(this.EnableDeathCounter_Click);
             // 
             // MainUI
             // 
