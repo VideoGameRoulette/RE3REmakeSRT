@@ -165,7 +165,7 @@ namespace RE3REmakeSRT
         private void MemoryPollingTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             bool exitLoop = false;
-
+            ResetInfo();
             try
             {
                 bool procRun = Program.gameMemory.ProcessRunning;
@@ -459,58 +459,72 @@ namespace RE3REmakeSRT
                     else { name = "Infected"; }
                 }
                 //CARLOS RACCOON CITY POLICE DEPARTMENT
-                if (Program.gameMemory.MapID >= 30 && Program.gameMemory.MapID <= 90)
+                else if (Program.gameMemory.MapID >= 30 && Program.gameMemory.MapID <= 90)
                 {
-                    if (enemyHP.MaximumHP >= 1660 && enemyHP.MaximumHP <= 1800) { name = "Licker"; }
+                    if (Program.gameMemory.Difficulty >= (int)REDifficultyState.NIGHTMARE && Program.gameMemory.MapID >= 69)
+                    {
+                        if (enemyHP.MaximumHP >= 1700 && enemyHP.MaximumHP <= 1800) { name = "Licker"; }
+                        else if (enemyHP.MaximumHP >= 1400 && enemyHP.MaximumHP < 1700) { name = "Pale Head"; }
+                        else { name = "Infected"; }
+                    }
+                    else if (enemyHP.MaximumHP >= 1600 && enemyHP.MaximumHP <= 1800) { name = "Licker"; }
                     else if (enemyHP.MaximumHP == 1500 && Program.gameMemory.MapID == 36) { name = "Brad"; }
-                    else if (enemyHP.MaximumHP > 800 && enemyHP.MaximumHP <= 1200 && Program.gameMemory.MapID == 296) { name = "Ne-α Deimos?"; }
                     else if (Program.gameMemory.Difficulty >= (int)REDifficultyState.NIGHTMARE && enemyHP.MaximumHP == 800 && Program.gameMemory.MapID == 42 && gotBattery) { name = "Brad?"; }
                     else { name = "Infected"; }
                 }
                 //JILL DOWNTOWN RACCOON CITY
-                if (Program.gameMemory.MapID >= 122 && Program.gameMemory.MapID <= 231)
+                else if (Program.gameMemory.MapID >= 122 && Program.gameMemory.MapID <= 231)
                 {
                     if (enemyHP.MaximumHP >= 7500) { nemesis = true; name = "Nemesis"; }
                     else if (enemyHP.MaximumHP >= 3000 && enemyHP.MaximumHP <= 3400) { name = "Hunter γ"; }
-                    else if (enemyHP.MaximumHP > 800 && enemyHP.MaximumHP <= 1200 && Program.gameMemory.MapID == 296) { name = "Ne-α Deimos"; }
-                    else if (enemyHP.MaximumHP == 200) { name = "Drain Deimos"; }
-                    else if (enemyHP.MaximumHP >= 170 && enemyHP.MaximumHP <= 180) { name = "Zombie Dogs"; }
+                    else if (enemyHP.MaximumHP > 800 && enemyHP.MaximumHP <= 1500) { name = "Ne-α Deimos"; }
+                    else if (Program.gameMemory.MapID >= 158 && enemyHP.MaximumHP >= 170 && enemyHP.MaximumHP <= 180) { name = "Zombie Dogs"; }
+                    else if (enemyHP.MaximumHP >= 160 && enemyHP.MaximumHP <= 240) { name = "Drain Deimos"; }
                     else { name = "Infected"; }
                 }
                 //JILL CLOCKTOWER
-                if (Program.gameMemory.MapID >= 237 && Program.gameMemory.MapID <= 242)
+                else if (Program.gameMemory.MapID >= 237 && Program.gameMemory.MapID <= 242)
                 {
                     if (enemyHP.MaximumHP == 20000) { nemesis = true; name = "Stage2 Nemesis"; }
                     else { name = "Infected"; }
                 }
                 //CARLOS & JILL HOSPITAL
-                if (Program.gameMemory.MapID >= 243 && Program.gameMemory.MapID <= 265)
+                else if (Program.gameMemory.MapID >= 243 && Program.gameMemory.MapID <= 266)
                 {
-                    if (enemyHP.MaximumHP > 1800 && enemyHP.MaximumHP <= 2200) { name = "Hunter β"; }
-                    else if (Program.gameMemory.Difficulty >= (int)REDifficultyState.NIGHTMARE && enemyHP.MaximumHP >= 1400 && enemyHP.MaximumHP <= 1800) { name = "Pale Heads"; }
-                    else if (Program.gameMemory.Difficulty >= (int)REDifficultyState.NIGHTMARE && enemyHP.MaximumHP >= 1660 && enemyHP.MaximumHP <= 1800 && Program.gameMemory.MapID == 245) { name = "Licker"; }
+                    if (Program.gameMemory.MapID == 244)
+                    {
+                        if (enemyHP.MaximumHP >= 1300 && enemyHP.MaximumHP <= 2200) { name = "Hunter β"; }
+                        else { name = "Infected"; }
+                    }
+                    if (enemyHP.MaximumHP >= 1800 && enemyHP.MaximumHP <= 2200) { name = "Hunter β"; }
+                    else if (Program.gameMemory.MapID <= 246 && Program.gameMemory.Difficulty >= (int)REDifficultyState.NIGHTMARE && enemyHP.MaximumHP >= 1660 && enemyHP.MaximumHP <= 1800) { name = "Licker"; }
+                    else if (Program.gameMemory.MapID >= 257 && Program.gameMemory.MapID < 261 && Program.gameMemory.Difficulty >= (int)REDifficultyState.NIGHTMARE && enemyHP.MaximumHP >= 1630 && enemyHP.MaximumHP <= 1660) { name = "Licker"; }
+                    else if (Program.gameMemory.Difficulty >= (int)REDifficultyState.NIGHTMARE && enemyHP.MaximumHP >= 1400 && enemyHP.MaximumHP < 1800) { name = "Pale Heads"; }
                     else { name = "Infected"; }
                 }
                 //JILL UNDERGROUND
-                if (Program.gameMemory.MapID >= 292 && Program.gameMemory.MapID <= 298)
+                else if (Program.gameMemory.MapID >= 292 && Program.gameMemory.MapID <= 299)
                 {
                     if (enemyHP.MaximumHP >= 3000 && enemyHP.MaximumHP <= 3400) { name = "Hunter γ"; }
                     else if (enemyHP.MaximumHP == 2000) { name = "Hunter β"; }
-                    else if (enemyHP.MaximumHP > 800 && enemyHP.MaximumHP <= 1200) { name = "Ne-α Deimos"; }
+                    else if (enemyHP.MaximumHP > 1500 && enemyHP.MaximumHP <= 1800) { name = "Pale Head"; }
+                    else if (enemyHP.MaximumHP > 800 && enemyHP.MaximumHP <= 1500) { name = "Ne-α Deimos"; }
                     else if (enemyHP.MaximumHP >= 170 && enemyHP.MaximumHP <= 180) { name = "Zombie Dogs"; }
                     else { name = "Infected"; }
                 }
                 //JILL NEST
-                if (Program.gameMemory.MapID >= 300 && Program.gameMemory.MapID <= 324)
+                else if (Program.gameMemory.MapID >= 300 && Program.gameMemory.MapID <= 324)
                 {
-                    if (Program.gameMemory.MapID >= 323) { nikolai = true; name = "Nikolai"; }
-                    else if (enemyHP.MaximumHP >= 7500) { nemesis3 = true; name = "Stage3 Nemesis"; }
+                    if (Program.gameMemory.MapID == 323) { nikolai = true; name = "Nikolai"; }
+                    else if (Program.gameMemory.MapID > 316 && enemyHP.MaximumHP >= 7500) { nemesis3 = true; name = "Stage3 Nemesis"; }
+                    else if (enemyHP.MaximumHP == 20000) { nemesis = true; name = "Stage2 Nemesis"; }
                     else if (enemyHP.MaximumHP >= 3000 && enemyHP.MaximumHP <= 3400) { name = "Hunter γ"; }
-                    else if (enemyHP.MaximumHP >= 1800 && enemyHP.MaximumHP <= 2200) { name = "Hunter β"; }
+                    else if (enemyHP.MaximumHP == 1800 || enemyHP.MaximumHP == 1900 || enemyHP.MaximumHP == 2000 || enemyHP.MaximumHP == 2200) { name = "Hunter β"; }
                     else if (enemyHP.MaximumHP >= 1400 && enemyHP.MaximumHP < 1800) { name = "Pale Heads"; }
                     else if (enemyHP.MaximumHP > 800 && enemyHP.MaximumHP <= 1200) { name = "Ne-α Deimos"; }
                     else { name = "Infected"; }
                 }
+                else { name = ""; }
 
                 //yOffset += HPBarHeight + 10;
                 if (enemyHP.MaximumHP > 9999)
@@ -519,12 +533,12 @@ namespace RE3REmakeSRT
                 }
                 else if (enemyHP.MaximumHP > 999 && enemyHP.MaximumHP < 10000)
                 {
-                    name = name.PadRight(15, ' ');
+                    if (nemesis3) { name = name.PadRight(18, ' '); }
+                    else { name = name.PadRight(15, ' '); }
                 }
                 else
                 {
                     if (nikolai) { name = name.PadRight(18, ' '); }
-                    if (nemesis3) { name = name.PadRight(18, ' '); }
                     else { name = name.PadRight(16, ' '); }
                 }
                 

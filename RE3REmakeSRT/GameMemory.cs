@@ -62,7 +62,7 @@ namespace RE3REmakeSRT
         public float RankScore { get; private set; }
 
         // Public Properties - Calculated
-        public long IGTCalculated => unchecked(IGTRunningTimer - IGTCutsceneTimer - IGTPausedTimer);
+        public long IGTCalculated => unchecked(IGTRunningTimer - IGTPausedTimer);
         public long IGTCalculatedTicks => unchecked(IGTCalculated * 10L);
         public TimeSpan IGTTimeSpan
         {
