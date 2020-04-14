@@ -54,15 +54,20 @@ namespace RE3REmakeSRT
         public int MrCharlies { get; private set; }
         public int LocksPicked { get; private set; }
         public int Rank { get; private set; }
+        public string RankName { get; private set; }
         public int Difficulty { get; private set; }
+        public string DifficultyName { get; private set; }
         public int Lore { get; private set; }
         public int Attachments { get; private set; }
         public int MapID { get; private set; }
         public int DeathCount { get; private set; }
         public float RankScore { get; private set; }
 
+        private TimeSpan SRank;
+        private TimeSpan BRank;
+
         // Public Properties - Calculated
-        public long IGTCalculated => unchecked(IGTRunningTimer - IGTPausedTimer);
+        public long IGTCalculated => unchecked(IGTRunningTimer - IGTCutsceneTimer - IGTPausedTimer);
         public long IGTCalculatedTicks => unchecked(IGTCalculated * 10L);
         public TimeSpan IGTTimeSpan
         {
@@ -94,7 +99,7 @@ namespace RE3REmakeSRT
             PointerIGT = new MultilevelPointer(memoryAccess, BaseAddress + 0x08DAA3F0, 0x60L); // *
             PointerSavesCount = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7C628, 0x1D8L, 0x198);
             PointerMapID = new MultilevelPointer(memoryAccess, BaseAddress + 0x05589470);
-            PointerDeathCount = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D783B0, 0xA8L, 0x70L, 0x230L);
+            PointerDeathCount = new MultilevelPointer(memoryAccess, BaseAddress + 0x08DA66F0);
             PointerRank = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D78258); // *
             PointerPlayerHP = new MultilevelPointer(memoryAccess, BaseAddress + 0x08D7C5E8, 0x50L, 0x20L); // *
             PointerPlayerPoison = new MultilevelPointer(memoryAccess, BaseAddress + 0x08DCB6C0, 0x50L, 0x20L, 0xF8L);
@@ -187,6 +192,7 @@ namespace RE3REmakeSRT
             IGTPausedTimer = PointerIGT.DerefLong(0x30);
         }
 
+
         /// <summary>
         /// This call refreshes everything. This should be used less often. Inventory rendering can be more expensive and doesn't change as often.
         /// </summary>
@@ -198,7 +204,7 @@ namespace RE3REmakeSRT
 
             // Other lookups that don't need to update as often.
             // Player HP
-            DeathCount = PointerDeathCount.DerefInt(0x18);
+            DeathCount = PointerDeathCount.DerefInt(0xC0);
             PlayerMaxHealth = PointerPlayerHP.DerefInt(0x54);
             PlayerCurrentHealth = PointerPlayerHP.DerefInt(0x58);
             PlayerPoisoned = PointerPlayerPoison.DerefByte(0x258) == 0x01;
@@ -217,6 +223,42 @@ namespace RE3REmakeSRT
             GLauncherKills = PointerStatsInfo.DerefInt(0x4C0);
             MAGKills = PointerStatsInfo.DerefInt(0x4C4);
             ARifleKills = PointerStatsInfo.DerefInt(0x4C8);
+
+            if (Difficulty == 0)
+            {
+                DifficultyName = "Assist";
+                SRank = new TimeSpan(0, 2, 30, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Difficulty == 1)
+            {
+                DifficultyName = "Standard";
+                SRank = new TimeSpan(0, 2, 0, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Difficulty == 2)
+            {
+                DifficultyName = "Hardcore";
+                SRank = new TimeSpan(0, 1, 45, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Difficulty == 3)
+            {
+                DifficultyName = "Nightmare";
+                SRank = new TimeSpan(0, 2, 0, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+            else if (Difficulty == 4)
+            {
+                DifficultyName = "Inferno";
+                SRank = new TimeSpan(0, 2, 0, 0);
+                BRank = new TimeSpan(0, 4, 0, 0);
+            }
+
+            if (IGTTimeSpan <= SRank && SavesCount <= 5) { RankName = "S"; }
+            else if (IGTTimeSpan <= SRank && SavesCount > 5) { RankName = "A"; }
+            else if (IGTTimeSpan > SRank && IGTTimeSpan <= BRank) { RankName = "B"; }
+            else if (IGTTimeSpan > BRank) { RankName = "C"; }
 
             // Enemy HP
             GenerateEnemyEntries();

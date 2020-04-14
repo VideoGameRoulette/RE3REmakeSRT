@@ -39,9 +39,12 @@
             this.EnableRankDifficulty = new System.Windows.Forms.ToolStripMenuItem();
             this.EnableDARankPoints = new System.Windows.Forms.ToolStripMenuItem();
             this.EnableDeathCounter = new System.Windows.Forms.ToolStripMenuItem();
-            this.statisticsPanel = new DoubleBuffered.DoubleBufferedPanel();
-            this.inventoryPanel = new DoubleBuffered.DoubleBufferedPanel();
+            this.EnableTimer = new System.Windows.Forms.ToolStripMenuItem();
+            this.EnableMilliseconds = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.EnableMapID = new System.Windows.Forms.ToolStripMenuItem();
+            this.inventoryPanel = new DoubleBuffered.DoubleBufferedPanel();
+            this.statisticsPanel = new DoubleBuffered.DoubleBufferedPanel();
             ((System.ComponentModel.ISupportInitialize)(this.playerHealthStatus)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -65,14 +68,16 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.EnableEnemy,
-            this.EnableStats,
-            this.EnableInventory,
+            this.EnableTimer,
             this.EnableRankDifficulty,
             this.EnableDARankPoints,
-            this.EnableDeathCounter});
+            this.EnableDeathCounter,
+            this.EnableMapID,
+            this.EnableEnemy,
+            this.EnableStats,
+            this.EnableInventory});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(217, 136);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(217, 202);
             // 
             // EnableEnemy
             // 
@@ -138,28 +143,28 @@
             this.EnableDeathCounter.CheckState = System.Windows.Forms.CheckState.Checked;
             this.EnableDeathCounter.Name = "EnableDeathCounter";
             this.EnableDeathCounter.Size = new System.Drawing.Size(216, 22);
-            this.EnableDeathCounter.Text = "Enable Map ID";
+            this.EnableDeathCounter.Text = "Enable Death Counter";
             this.EnableDeathCounter.Click += new System.EventHandler(this.EnableDeathCounter_Click);
             // 
-            // statisticsPanel
+            // EnableTimer
             // 
-            this.statisticsPanel.ContextMenuStrip = this.contextMenuStrip1;
-            this.statisticsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.statisticsPanel.Location = new System.Drawing.Point(3, 170);
-            this.statisticsPanel.Name = "statisticsPanel";
-            this.statisticsPanel.Size = new System.Drawing.Size(334, 139);
-            this.statisticsPanel.TabIndex = 2;
-            this.statisticsPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.statisticsPanel_MouseDown);
+            this.EnableTimer.Checked = true;
+            this.EnableTimer.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableTimer.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.EnableMilliseconds});
+            this.EnableTimer.Name = "EnableTimer";
+            this.EnableTimer.Size = new System.Drawing.Size(216, 22);
+            this.EnableTimer.Text = "Enable Timer";
+            this.EnableTimer.Click += new System.EventHandler(this.EnableTimer_Click);
             // 
-            // inventoryPanel
+            // EnableMilliseconds
             // 
-            this.inventoryPanel.BackColor = System.Drawing.Color.Blue;
-            this.inventoryPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.inventoryPanel.Location = new System.Drawing.Point(3, 315);
-            this.inventoryPanel.Name = "inventoryPanel";
-            this.inventoryPanel.Size = new System.Drawing.Size(334, 414);
-            this.inventoryPanel.TabIndex = 3;
-            this.inventoryPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.inventoryPanel_MouseDown);
+            this.EnableMilliseconds.Checked = true;
+            this.EnableMilliseconds.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EnableMilliseconds.Name = "EnableMilliseconds";
+            this.EnableMilliseconds.Size = new System.Drawing.Size(180, 22);
+            this.EnableMilliseconds.Text = "Enable Milliseconds";
+            this.EnableMilliseconds.Click += new System.EventHandler(this.EnableMilliseconds_Click);
             // 
             // tableLayoutPanel2
             // 
@@ -177,6 +182,33 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 420F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(340, 732);
             this.tableLayoutPanel2.TabIndex = 4;
+            // 
+            // EnableMapID
+            // 
+            this.EnableMapID.Name = "EnableMapID";
+            this.EnableMapID.Size = new System.Drawing.Size(216, 22);
+            this.EnableMapID.Text = "EnableMapID";
+            this.EnableMapID.Click += new System.EventHandler(this.EnableMapID_Click);
+            // 
+            // inventoryPanel
+            // 
+            this.inventoryPanel.BackColor = System.Drawing.Color.Blue;
+            this.inventoryPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.inventoryPanel.Location = new System.Drawing.Point(3, 315);
+            this.inventoryPanel.Name = "inventoryPanel";
+            this.inventoryPanel.Size = new System.Drawing.Size(334, 414);
+            this.inventoryPanel.TabIndex = 3;
+            this.inventoryPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.inventoryPanel_MouseDown);
+            // 
+            // statisticsPanel
+            // 
+            this.statisticsPanel.ContextMenuStrip = this.contextMenuStrip1;
+            this.statisticsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.statisticsPanel.Location = new System.Drawing.Point(3, 170);
+            this.statisticsPanel.Name = "statisticsPanel";
+            this.statisticsPanel.Size = new System.Drawing.Size(334, 139);
+            this.statisticsPanel.TabIndex = 2;
+            this.statisticsPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.statisticsPanel_MouseDown);
             // 
             // MainUI
             // 
@@ -221,5 +253,8 @@
         private System.Windows.Forms.ToolStripMenuItem EnableRankDifficulty;
         private System.Windows.Forms.ToolStripMenuItem EnableDARankPoints;
         private System.Windows.Forms.ToolStripMenuItem EnableDeathCounter;
+        private System.Windows.Forms.ToolStripMenuItem EnableTimer;
+        private System.Windows.Forms.ToolStripMenuItem EnableMilliseconds;
+        private System.Windows.Forms.ToolStripMenuItem EnableMapID;
     }
 }

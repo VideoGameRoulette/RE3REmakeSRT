@@ -376,8 +376,21 @@ namespace RE3REmakeSRT
             Font font3 = new Font("Consolas", fontSize3, FontStyle.Bold);
 
             // IGT Display.
-            e.Graphics.DrawString(string.Format("{0}", Program.gameMemory.IGTFormattedString.Remove(8,4)), font, Brushes.White, xOffset, -10, stdStringFormat);
-            yOffset += fontSize;
+            if (EnableTimer.Checked)
+            {
+ 
+                if (EnableMilliseconds.Checked)
+                {
+                    e.Graphics.DrawString(string.Format("{0}", Program.gameMemory.IGTFormattedString), font, Brushes.White, xOffset, -10, stdStringFormat);
+                    yOffset += fontSize;
+                }
+                else
+                {
+                    e.Graphics.DrawString(string.Format("{0}", Program.gameMemory.IGTFormattedString.Remove(8, 4)), font, Brushes.White, xOffset, -10, stdStringFormat);
+                    yOffset += fontSize;
+                }
+                
+            }
 
             //Time Spans
             if (Program.gameMemory.Difficulty == (int)REDifficultyState.ASSIST)
@@ -433,11 +446,16 @@ namespace RE3REmakeSRT
             if (EnableDeathCounter.Checked)
             {
                 yOffset += 10;
-                e.Graphics.DrawString(string.Format("MapID: {0}", Program.gameMemory.MapID.ToString()), font3, Brushes.Gray, xOffset + 1, yOffset, stdStringFormat);
-                //e.Graphics.DrawString(string.Format("Deaths: {0}", 0), font3, Brushes.Gray, xOffset + 1, yOffset, stdStringFormat);
+                e.Graphics.DrawString(string.Format("Deaths: {0}", Program.gameMemory.DeathCount), font3, Brushes.Gray, xOffset + 1, yOffset, stdStringFormat);
                 yOffset += fontSize3;
             }
-            
+
+            if (EnableMapID.Checked)
+            {
+                yOffset += 10;
+                e.Graphics.DrawString(string.Format("MapID: {0}", Program.gameMemory.MapID.ToString()), font3, Brushes.Gray, xOffset + 1, yOffset, stdStringFormat);
+                yOffset += fontSize3;
+            }
 
             //e.Graphics.DrawString(string.Format("SaveCount:{0}", Program.gameMemory.SavesCount), font, Brushes.Gray, x2, heightOffset + fontSize, stdStringFormat);
 
@@ -478,7 +496,7 @@ namespace RE3REmakeSRT
                     if (enemyHP.MaximumHP >= 7500) { nemesis = true; name = "Nemesis"; }
                     else if (enemyHP.MaximumHP >= 3000 && enemyHP.MaximumHP <= 3400) { name = "Hunter γ"; }
                     else if (enemyHP.MaximumHP > 800 && enemyHP.MaximumHP <= 1500) { name = "Ne-α Deimos"; }
-                    else if (Program.gameMemory.MapID >= 158 && enemyHP.MaximumHP >= 170 && enemyHP.MaximumHP <= 180) { name = "Zombie Dogs"; }
+                    else if (Program.gameMemory.MapID <= 159 && enemyHP.MaximumHP >= 160 && enemyHP.MaximumHP <= 200) { name = "Zombie Dogs"; }
                     else if (enemyHP.MaximumHP >= 160 && enemyHP.MaximumHP <= 240) { name = "Drain Deimos"; }
                     else { name = "Infected"; }
                 }
@@ -546,7 +564,7 @@ namespace RE3REmakeSRT
 
                 if (EnableEnemy.Checked)
                 {
-                    if (enemyHP.MaximumHP == 1 || enemyHP.MaximumHP > 20000) { }
+                    if (enemyHP.MaximumHP <= 100 || enemyHP.MaximumHP > 20000) { }
                     else if (nemesis3)
                     {
                         yOffset += 8;
@@ -857,6 +875,37 @@ namespace RE3REmakeSRT
             {
                 gotBattery = false;
             }
+        }
+
+        private void EnableTimer_Click(object sender, EventArgs e)
+        {
+            EnableTimer.Checked = !EnableTimer.Checked;
+            if (EnableTimer.Checked)
+            {
+                this.Height += 34;
+            }
+            else
+            {
+                this.Height -= 34;
+            }
+        }
+
+        private void EnableMapID_Click(object sender, EventArgs e)
+        {
+            EnableMapID.Checked = !EnableMapID.Checked;
+            if (EnableMapID.Checked)
+            {
+                this.Height += 34;
+            }
+            else
+            {
+                this.Height -= 34;
+            }
+        }
+
+        private void EnableMilliseconds_Click(object sender, EventArgs e)
+        {
+            EnableMilliseconds.Checked = !EnableMilliseconds.Checked;
         }
     }
 }

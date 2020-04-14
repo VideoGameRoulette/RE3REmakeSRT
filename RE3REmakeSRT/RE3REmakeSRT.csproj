@@ -148,6 +148,9 @@
     <Reference Include="Microsoft.Net.Http.Headers, Version=2.2.8.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Net.Http.Headers.2.2.8\lib\netstandard2.0\Microsoft.Net.Http.Headers.dll</HintPath>
     </Reference>
+    <Reference Include="ProcessMemory">
+      <HintPath>..\ProcessMemory\ProcessMemory\bin\x64\Debug\netstandard2.0\ProcessMemory.dll</HintPath>
+    </Reference>
     <Reference Include="SharpDX, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpDX.4.2.0\lib\net45\SharpDX.dll</HintPath>
     </Reference>
@@ -288,13 +291,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DoubleBuffered\DoubleBuffered\DoubleBuffered.csproj">
+    <ProjectReference Include="..\DoubleBuffered\DoubleBuffered\DoubleBuffered.csproj">
       <Project>{1e8fcf88-0023-45c8-bee8-2c3e5f6a5322}</Project>
       <Name>DoubleBuffered</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\ProcessMemory\ProcessMemory\ProcessMemory.csproj">
-      <Project>{f8bd5053-142c-4708-b346-d08c6261e293}</Project>
-      <Name>ProcessMemory</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -321,9 +320,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == '' Or '$(BuildingInsideVisualStudio)' == 'true'">
-    <PostBuildEvent>"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /tr "http://timestamp.digicert.com" /td SHA1 /n "Travis J Gutjahr" /sm /fd SHA1 "$(TargetDir)\RE3REmakeSRT.exe"
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /tr "http://timestamp.digicert.com" /td SHA256 /n "Travis J Gutjahr" /sm /fd SHA256 /as "$(TargetDir)\RE3REmakeSRT.exe"
-"C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64\signtool.exe" sign /tr "http://timestamp.digicert.com" /td SHA512 /n "Travis J Gutjahr" /sm /fd SHA512 /as "$(TargetDir)\RE3REmakeSRT.exe"
-</PostBuildEvent>
   </PropertyGroup>
 </Project>
