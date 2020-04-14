@@ -77,7 +77,7 @@
             this.EnableStats,
             this.EnableInventory});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(217, 202);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(217, 180);
             // 
             // EnableEnemy
             // 
@@ -223,7 +223,6 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(360, 1080);
-            this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(360, 630);
             this.Name = "MainUI";
             this.ShowIcon = false;
