@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>RE3 REmake SRT JSON Display Page</title>
+	<script>
+		// USER CONFIGURABLE VARIABLES.
+		const JSON_ADDRESS = '127.0.0.1'; // IP OR HOSTNAME OF THE COMPUTER RUNNING THE SRT. USEFUL FOR MULTIPLE PC STREAMING SETUPS.
+		const JSON_PORT = 7190; // PORT OF THE JSON ENDPOINT. NOT LIKELY TO CHANGE UNLESS YOU COMPILED THE SRT YOURSELF FROM SOURCE CODE.
+		const POLLING_RATE = 333; // THE TIME IN MILLISECONDS WE'LL REQUEST UPDATED VALUES.
+	</script>
+	<style>
+		body {
+			background-color: #000000;
+			color: #ffffff;
+			font-family: Arial;
+		}
+
+		.container {
+			width: 320px;
+			height: 1080px;
+		}
+
+		#srtQueryData {
+			position: relative;
+			width: 100%;
+			height: 100%;
+		}
+
+		#currenthp {
+			position: absolute;
+			top: 115px;
+			left: 22px;
+		}
+
+		#deaths {
+			position: absolute;
+			top: 115px;
+			right: 0px;
+			padding-right: 40px;
+		}
+
+		#igt {
+			position: absolute;
+			width: 100%;
+			font-size: 54px;
+			text-align: center;
+		}
+
+		#rank {
+			position: absolute;
+			font-size: 16px;
+			top: 220px;
+			padding-left: 10px;
+		}
+
+		#difficulty {
+			position: absolute;
+			font-size: 16px;
+			top: 220px;
+			right: 0px;
+			padding-right: 10px;
+		}
+
+		#darank {
+			position: absolute;
+			font-size: 16px;
+			top: 240px;
+			padding-left: 10px;
+		}
+
+		#score {
+			position: absolute;
+			font-size: 16px;
+			top: 240px;
+			right: 0px;
+			padding-right: 10px;
+		}
+
+		#enemy {
+			position: absolute;
+			font-size: 20px;
+			top: 260px;
+			padding-left: 10px;
+			color: red;
+		}
+
+		.enemyhp {
+			position: relative;
+			top: 120px;
+			left: -1px;
+			background: rgba(0, 0, 0, 0);
+			width: calc(320px - 8px);
+			border: rgba(60, 60, 60, 255) solid 2px;
+			height: 30px;
+		}
+
+		.enemyhpbar {
+			background: rgba(100, 0, 0, 255);
+			width: 100%;
+			height: 30px;
+		}
+
+		#currentenemyhp {
+			font-size: 28px;
+			color: red;
+			padding-left: 10px;
+		}
+
+		#percentenemyhp {
+			position: absolute;
+			top: 0px;
+			right: 0px;
+			font-size: 28px;
+			color: red;
+			padding-right: 10px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div id="srtQueryData"></div>
+	</div>
+	<script>
+		const JSON_ENDPOINT = `http://${JSON_ADDRESS}:${JSON_PORT}/`;
+		window.onload = function() {
+			getData();
+			setInterval(getData, POLLING_RATE);
+		};
+		var Asc = function(a, b) {
+			if (a > b) return +1;
+			if (a < b) return -1;
+			return 0;
+		};
+		var Desc = function(a, b) {
+			if (a > b) return -1;
+			if (a < b) return +1;
+			return 0;
+		};
+
+		function getData() {
+			fetch(JSON_ENDPOINT)
+				.then(function(response) {
+					return response.json();
+				})
+				.then(function(data) {
+					appendData(data);
+				})
+				.catch(function(err) {
+					console.log("Error: " + err);
+				});
+		}
+
+		function appendData(data) {
+			var mainContainer = document.getElementById("srtQueryData");
+			mainContainer.innerHTML = "";
+			if (data.PlayerPoisoned)
+				mainContainer.innerHTML +=
+				`<img src="https://cdn.discordapp.com/attachments/551840398016774193/699457932017926154/POISON.gif"/><font size="4" color="#7851a9"><div id="currenthp">${data.PlayerCurrentHealth}</div></font>`;
+			// Toxic
+			else if (data.PlayerCurrentHealth <= 1200 && data.PlayerCurrentHealth >= 801)
+				mainContainer.innerHTML +=
+				`<img src="https://cdn.discordapp.com/attachments/551840398016774193/699457929769779230/FINE.gif"/><font size="4" color="#7cfc00"><div id="currenthp">${data.PlayerCurrentHealth}</div></font>`;
+			// aFineBoi
+			else if (data.PlayerCurrentHealth <= 800 && data.PlayerCurrentHealth >= 361)
+				mainContainer.innerHTML +=
+				`<img src="https://cdn.discordapp.com/attachments/551840398016774193/699457914733199492/CAUTION-YELLOW.gif"/><font size="4" color="#daa520"><div id="currenthp">${data.PlayerCurrentHealth}</div></font>`;
+			// Caution!
+			else if (data.PlayerCurrentHealth <= 360 && data.PlayerCurrentHealth >= 1)
+				mainContainer.innerHTML +=
+				`<img src="https://cdn.discordapp.com/attachments/551840398016774193/699457923868262510/DANGER.gif"/><font size="4" color="#ff0000"><div id="currenthp">${data.PlayerCurrentHealth}</div></font>`;
+			// Dangerops!
+			else
+				mainContainer.innerHTML += `<img src="https://cdn.discordapp.com/attachments/551840398016774193/699457927320305704/EMPTY.gif"/>
+			<font size="4" color="#ff0000"><div id="currenthp">${data.PlayerCurrentHealth}</div></font>`;
+			mainContainer.innerHTML += `<div id="deaths">Death Count: ${data.DeathCount}</div>`;
+			mainContainer.innerHTML += `<div id="igt">${data.IGTFormattedString}</div>`;
+			mainContainer.innerHTML += `<div id="rank">Rank: ${data.RankName}</div>`;
+			mainContainer.innerHTML += `<div id="difficulty">Difficulty: ${data.DifficultyName}</div>`;
+			mainContainer.innerHTML += `<div id="darank">DA Rank: ${data.Rank}</div>`;
+			mainContainer.innerHTML += `<div id="score">DA Score: ${data.RankScore}</div>`;
+			mainContainer.innerHTML += `<div id="enemy">Enemy HP</div>`;
+			var table = document.createElement("table");
+			data.EnemyHealth.sort(function(a, b) {
+				return Asc(a.Percentage, b.Percentage) || Desc(a.CurrentHP, b.CurrentHP);
+			}).forEach(function(item, index, arr) {
+				if (item.IsAlive) {
+					table.innerHTML += `<tr><td><div class="enemyhp"><div class="enemyhpbar" style="width:${parseFloat(item.Percentage * 100).toFixed(1)}%"><div id="currentenemyhp">${item.CurrentHP}</div><div id="percentenemyhp">${parseFloat(item.Percentage * 100).toFixed(1)}%</div></div></div></td></tr>`;
+				}
+			});
+			mainContainer.appendChild(table);
+		}
+	</script>
+</body>
+
+</html>
