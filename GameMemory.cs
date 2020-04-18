@@ -31,7 +31,6 @@ namespace RE3REmakeSRT
         private MultilevelPointer PointerEnemyEntryCount { get; set; }
         private MultilevelPointer[] PointerEnemyEntries { get; set; }
         private MultilevelPointer PointerInventoryCount { get; set; }
-        private MultilevelPointer PointerGLAmmo { get; set; }
         private MultilevelPointer[] PointerInventoryEntries { get; set; }
         private MultilevelPointer PointerStatsInfo { get; set; }
         private MultilevelPointer PointerDifficulty { get; set; }
@@ -190,7 +189,6 @@ namespace RE3REmakeSRT
             PointerStatsInfo.UpdatePointers();
             PointerDifficulty.UpdatePointers();
             PointerBox.UpdatePointers();
-            PointerGLAmmo.UpdatePointers();
             PointerInventoryCount.UpdatePointers();
 
             PointerEnemyEntryCount.UpdatePointers();
